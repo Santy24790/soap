@@ -1,0 +1,119 @@
+USUARIOS:
+----------------
+
+VER USUARIOS
+----------------
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="Usuarios">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:VerUsuarios/>
+   </soapenv:Body>
+</soapenv:Envelope>
+----------------
+
+VER DETALLE
+----------------
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="Usuarios">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:VerUsuario>
+         <id>123</id>
+      </tns:VerUsuario>
+   </soapenv:Body>
+</soapenv:Envelope>
+----------------
+
+CREAR USUARIO
+----------------
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="Usuarios">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:CrearUsuario>
+         <data>
+            <user_name>Juan</user_name>
+            <last_name>Pérez</last_name>
+            <nombre_doc>Documento1</nombre_doc>
+            <address>Dirección 123</address>
+            <telephone>1234567890</telephone>
+            <email>javier@gmail.com</email>
+            <password>123.</password>
+         </data>
+      </tns:CrearUsuario>
+   </soapenv:Body>
+</soapenv:Envelope>
+----------------
+
+
+ACTUALIZAR USUARIO
+----------------
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="Usuarios">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:ActualizarUsuario>
+         <data>
+            <user_name>Juan</user_name>
+            <lastname>Pérez</lastname>
+            <nombre_doc>Documento1</nombre_doc>
+            <address>Direccion 123</address>
+            <telephone>1234567890</telephone>
+            <email>juan@example.com</email>
+         </data>
+         <id>123</id>
+      </tns:ActualizarUsuario>
+   </soapenv:Body>
+</soapenv:Envelope>
+----------------
+
+
+ELIMINAR USUARIO
+----------------
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="Usuarios">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:EliminarUsuario>
+         <id>123</id>
+      </tns:EliminarUsuario>
+   </soapenv:Body>
+</soapenv:Envelope>
+----------------
+
+VER productos
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:prod="Productos">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <prod:CrearProducto>
+         <data>
+            <nombre>Producto A</nombre>
+            <descripcion>Descripción del producto A</descripcion>
+            <stock>10</stock>
+            <categoria_idcategoria>1</categoria_idcategoria>
+            <proveedor_idproveedor>1</proveedor_idproveedor>
+            <estado_idestado>1</estado_idestado>
+            <precio>100.50</precio>
+         </data>
+      </prod:CrearProducto>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+
+
+LOGIN:
+----------------
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="LoginUsuario">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:InicioSesion>
+         <data>
+         <email>javier@gmail.com</email>
+         <password>123.</password>
+         </data>
+      </tns:InicioSesion>
+   </soapenv:Body>
+</soapenv:Envelope>     
+----------------
