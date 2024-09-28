@@ -1,2 +1,2 @@
 # soap
-trabako
+trabajo
