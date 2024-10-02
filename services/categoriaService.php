@@ -1,12 +1,12 @@
 <?php
-// services/CategoriaService.php
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
-require_once __DIR__ . '/../config/productos.php';
+require_once __DIR__ . '/../config/productos.php'; // Asegúrate de que este archivo contenga la conexión a la base de datos
 require_once __DIR__ . '/../controllers/CategoriaController.php';
+require_once __DIR__ . '/../config/productos_db.php'; // Asegúrate de que este archivo contenga la conexión a la base de datos
 
 // Configuración del servicio SOAP
 $namespace = "Categorias";
-$server = new Soap_Server();
+$server = new soap_server();
 $server->configureWSDL('ServicioCategorias', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
 
@@ -26,43 +26,42 @@ $server->wsdl->addComplexType(
 function VerCategorias() {
     $pdo = getConnection();
     $controller = new CategoriaController($pdo);
-    return $controller->getAllCategorias();
+    return $controller->getAllCategorias(); // Asegúrate de que este método devuelva un XML
 }
 
 // Función que llama al controlador para obtener el detalle de una categoría
 function VerCategoria($id) {
     $pdo = getConnection();
     $controller = new CategoriaController($pdo);
-    return $controller->getCategoriaDetail($id);
+    return $controller->getCategoriaDetail($id); // Asegúrate de que este método devuelva un XML
 }
 
 // Función que llama al controlador para crear una categoría
 function CrearCategoria($data) {
-    var_dump($data); // Imprimir datos para depuración
     $pdo = getConnection();
     $controller = new CategoriaController($pdo);
-    return $controller->createCategoria($data);
+    return $controller->createCategoria($data); // Asegúrate de que este método devuelva un mensaje
 }
 
 // Función que llama al controlador para actualizar una categoría
 function ActualizarCategoria($data, $id) {
     $pdo = getConnection();
     $controller = new CategoriaController($pdo);
-    return $controller->updateCategoria($data, $id);
+    return $controller->updateCategoria($data, $id); // Asegúrate de que este método devuelva un mensaje
 }
 
 // Función que llama al controlador para eliminar una categoría
 function EliminarCategoria($id) {
     $pdo = getConnection();
     $controller = new CategoriaController($pdo);
-    return $controller->deleteCategoria($id);
+    return $controller->deleteCategoria($id); // Asegúrate de que este método devuelva un mensaje
 }
 
 // Registrar métodos SOAP para ver todas las categorías
 $server->register(
     'VerCategorias',
     array(),
-    array('return' => 'xsd:Array'),
+    array('return' => 'xsd:string'), // Cambiado a xsd:string para devolver XML
     $namespace,
     false,
     'rpc',
