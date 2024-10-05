@@ -1,16 +1,17 @@
 <?php
-// config/db.php
 function getConnection() {
-    $dsn = 'mysql:host=127.0.0.1;port=3306;dbname=gestion_usuarios;charset=utf8';
-    $username = 'root';
-    $password = '';
+    $host = 'localhost';
+    $db = 'gestion_usuarios'; // Asegúrate de que sea la base de datos correcta
+    $user = 'root'; // Cambia si tu usuario es diferente
+    $pass = ''; // Cambia si tu contraseña es diferente
 
     try {
-        $pdo = new PDO($dsn, $username, $password);
+        $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     } catch (PDOException $e) {
-        die('Error de conexión: ' . $e->getMessage());
+        echo "Connection failed: " . $e->getMessage();
+        return null;
     }
 }
 ?>

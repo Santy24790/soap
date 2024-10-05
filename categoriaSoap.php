@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/vendor/econea/nusoap/src/nusoap.php';
-
+require_once __DIR__ . '/controllers/CategoriaController.php';
+require_once __DIR__ . '/config/db.php'; // Conexión a la base de datos
 // Crear un nuevo servidor SOAP
 $namespace = "http://localhost/soap1/categoriaSoap.php";
 $server = new soap_server();
@@ -8,6 +9,27 @@ $server->configureWSDL('ServicioCategorias', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
 
 // Función para obtener todas las categorías
+function buscarCategoria($nombre)
+{
+    $pdo = getConnection(); // Obtener la conexión a la base de datos
+    $controller = new CategoriaController($pdo);
+    ob_start(); // Capturar la salida del método para enviarla como retorno SOAP
+    $controller->buscarCategoria($nombre);
+    $xmlResponse = ob_get_clean();
+    return $xmlResponse;
+}
+
+// Registrar el método para buscar una categoría
+$server->register(
+    'buscarCategoria',
+    array('nombre' => 'xsd:string'), // Parámetro de entrada: el nombre de la categoría
+    array('return' => 'xsd:string'), // Tipo de retorno
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar una categoría por nombre'
+);
 function VerCategorias()
 {
     $categorias = [
@@ -46,10 +68,23 @@ function VerCategoria($id)
 // Función para crear una nueva categoría
 function CrearCategoria($data)
 {
-    $nombre = $data['nombre'];
-    // Aquí se agregaría la lógica para insertar en la base de datos
-    return "Categoría '$nombre' creada exitosamente.";
+    $pdo = getConnection(); // Obtener la conexión a la base de datos
+    $controller = new CategoriaController($pdo);
+    return $controller->createCategoria($data); // Llamar al controlador para crear la categoría
 }
+
+// Registrar el método para crear una categoría
+$server->register(
+    'CrearCategoria',
+    array('data' => 'tns:Categoria'), // Definir un argumento de tipo 'Categoria'
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Crear una nueva categoría'
+);
+
 
 // Función para actualizar una categoría
 function ActualizarCategoria($data, $id)
@@ -101,28 +136,9 @@ $server->register(
     'Obtiene una categoría por su ID'
 );
 
-// Registrar el método para crear una categoría
-$server->register(
-    'CrearCategoria',
-    array('data' => 'tns:Categoria'), // Solo un argumento ahora
-    array('return' => 'xsd:string'),
-    $namespace,
-    false,
-    'rpc',
-    'encoded',
-    'Crear una nueva categoría'
-);
+// Registrar el método para crear una categor
 
-$server->register(
-    'ActualizarCategoria',
-    array('data' => 'tns:Categoria', 'id' => 'xsd:int'),
-    array('return' => 'xsd:string'),
-    $namespace,
-    false,
-    'rpc',
-    'encoded',
-    'Actualizar una categoría existente'
-);
+
 
 $server->register(
     'EliminarCategoria',

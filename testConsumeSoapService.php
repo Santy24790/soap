@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/vendor/econea/nusoap/src/nusoap.php';
+$location = "http://localhost:90/bd.php/categoriaSoap.php?wsdl";
 
 // URL del servicio SOAP
 $wsdl = "http://localhost/soap1/categoriaSoap.php?wsdl";

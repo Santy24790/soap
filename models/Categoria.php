@@ -8,6 +8,14 @@ class Categoria
     {
         $this->pdo = $pdo;
     }
+    public function buscarPorNombre($nombre)
+{
+    $stmt = $this->pdo->prepare("SELECT * FROM categorias WHERE nombre LIKE :nombre");
+    $nombre = "%" . $nombre . "%";
+    $stmt->bindParam(':nombre', $nombre);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     // Obtener todas las categorías
     public function getCategorias()

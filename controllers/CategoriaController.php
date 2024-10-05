@@ -10,6 +10,30 @@ class CategoriaController
     {
         $this->categoriaModel = new Categoria($pdo);
     }
+    // Buscar categorías por nombre
+public function buscarCategoria($nombre)
+{
+    $categorias = $this->categoriaModel->buscarPorNombre($nombre);
+
+    if ($categorias) {
+        $xml = new SimpleXMLElement('<categorias/>');
+        foreach ($categorias as $categoria) {
+            $categoriaNode = $xml->addChild('categoria');
+            foreach ($categoria as $key => $value) {
+                $categoriaNode->addChild($key, htmlspecialchars($value));
+            }
+        }
+        header('Content-Type: text/xml');
+        echo $xml->asXML();
+        exit;
+    } else {
+        $xml = new SimpleXMLElement('<error/>');
+        $xml->addChild('mensaje', 'No se encontraron categorías con ese nombre');
+        header('Content-Type: text/xml');
+        echo $xml->asXML();
+        exit;
+    }
+}
 
     // Obtener todas las categorías
     public function getAllCategorias()
