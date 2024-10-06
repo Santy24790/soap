@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
 require_once __DIR__ . '/../config/productos.php'; // Asegúrate de que este archivo contenga la conexión a la base de datos
-require_once __DIR__ . '/../controllers/CategoriaController.php';
+require_once __DIR__ . '/../controllers/usuarioCategoriaController.php';
 require_once __DIR__ . '/../config/productos_db.php'; // Asegúrate de que este archivo contenga la conexión a la base de datos
 
 // Configuración del servicio SOAP

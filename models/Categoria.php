@@ -6,16 +6,18 @@ class Categoria
 
     public function __construct($pdo)
     {
-        $this->pdo = $pdo;
+        $this->pdo = $pdo; // Utilizar la conexión pasada como parámetro
     }
+
+    // Método para buscar categorías por nombre
     public function buscarPorNombre($nombre)
-{
-    $stmt = $this->pdo->prepare("SELECT * FROM categorias WHERE nombre LIKE :nombre");
-    $nombre = "%" . $nombre . "%";
-    $stmt->bindParam(':nombre', $nombre);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM categoria WHERE nombre LIKE :nombre");
+        $nombre = "%" . $nombre . "%";
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     // Obtener todas las categorías
     public function getCategorias()
@@ -72,3 +74,4 @@ class Categoria
         return $stmt->execute(); // Devuelve true si la eliminación fue exitosa, false en caso contrario
     }
 }
+?>

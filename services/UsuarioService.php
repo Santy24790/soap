@@ -1,8 +1,9 @@
 <?php
 // services/UsuarioService.php
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/productos.php';
 require_once __DIR__ . '/../controllers/UsuarioController.php';
+require_once __DIR__ . '/../controllers/CategoriaController.php'; // Importar el controlador de categorías
 
 // Configuración del servicio SOAP
 $namespace = "user";
@@ -26,10 +27,20 @@ $server->wsdl->addComplexType(
         'email' => array('name' => 'email', 'type' => 'xsd:string'),
         'password' => array('name' => 'password', 'type' => 'xsd:string'),
         'doc_type_id' => array('name' => 'doc_type_id', 'type' => 'xsd:int'),
-        
     )
 );
 
+// Registrar método SOAP para buscar una categoría
+$server->register(
+    'BuscarCategoria',
+    array('nombre' => 'xsd:string'), // Parámetro de entrada
+    array('return' => 'xsd:string'), // Tipo de retorno
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar una categoría por nombre'
+);
 
 // Registrar método SOAP para ver todos los usuarios
 $server->register(
@@ -91,47 +102,66 @@ $server->register(
     'Eliminar un usuario'
 );
 
+// Función que llama al controlador para buscar una categoría por nombre
+function BuscarCategoria($nombre)
+{
+    $pdo = getConnection('productos_bd'); // Conectar a la base de datos de productos
+    $categoriaModel = new Categoria($pdo); // Pasar la conexión al modelo
+    $categorias = $categoriaModel->buscarPorNombre($nombre);
 
-// Función que llama al controlador para ver todos los usuarios
-function VerUsuarios() {
-    $pdo = getConnection();
+    // Convertir los resultados a XML y devolverlos como respuesta SOAP
+    $xml = new SimpleXMLElement('<categorias/>');
+    foreach ($categorias as $categoria) {
+        $categoriaNode = $xml->addChild('categoria');
+        foreach ($categoria as $key => $value) {
+            $categoriaNode->addChild($key, htmlspecialchars($value));
+        }
+    }
+    return $xml->asXML();
+}
+
+// Función que llama al controlador para obtener todos los usuarios
+function VerUsuarios()
+{
+    $pdo = getConnection('gestion_usuarios'); // Conectar a la base de datos de usuarios
     $controller = new UserController($pdo);
     return $controller->getAllUsers();
 }
 
-// Función que llama al controlador para obtener el detalle de uh usuario
-function VerUsuario($id) {
+// Función que llama al controlador para obtener el detalle de un usuario
+function VerUsuario($id)
+{
     $pdo = getConnection();
     $controller = new UserController($pdo);
     return $controller->getUserDetail($id);
 }
 
-// Función que llama al controlador para crear usuario
-function CrearUsuario($data) {
+// Función que llama al controlador para crear un usuario
+function CrearUsuario($data)
+{
     $pdo = getConnection();
     $controller = new UserController($pdo);
     return $controller->createUser($data);
 }
 
-// Función que llama al controlador para actualizar usuario
-function ActualizarUsuario($data, $id) {
+// Función que llama al controlador para actualizar un usuario
+function ActualizarUsuario($data, $id)
+{
     $pdo = getConnection();
     $controller = new UserController($pdo);
     return $controller->updateUser($data, $id);
 }
 
-
-// Función que llama al controlador para eliminar usuario
-function EliminarUsuario($id) {
+// Función que llama al controlador para eliminar un usuario
+function EliminarUsuario($id)
+{
     $pdo = getConnection();
     $controller = new UserController($pdo);
     return $controller->deleteUser($id);
 }
 
-//-----------------------
 
 // Procesar solicitud SOAP
 $POST_DATA = file_get_contents("php://input");
 $server->service($POST_DATA);
 exit();
-?>

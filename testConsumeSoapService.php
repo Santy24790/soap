@@ -61,4 +61,4 @@ if ($err_status) {
     echo "Respuesta del servicio:<br>";
     echo htmlspecialchars($response); // Mostrar la respuesta
 }
-?>
+
