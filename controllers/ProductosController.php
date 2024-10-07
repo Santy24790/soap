@@ -12,6 +12,22 @@ class ProductoController
         $this->productoModel = new Producto($pdo);
     }
 
+    public function buscarEnProductos($valor)
+    {
+        $productos = $this->productoModel->buscarEnProductos($valor);
+
+        // Devolver los resultados en formato XML
+        $xml = new SimpleXMLElement('<productos/>');
+        foreach ($productos as $producto) {
+            $productoNode = $xml->addChild('producto');
+            foreach ($producto as $key => $value) {
+                $productoNode->addChild($key, htmlspecialchars($value));
+            }
+        }
+
+        header('Content-Type: text/xml');
+        echo $xml->asXML();
+    }
     // Obtener todos los productos
     public function getAllProductos()
 {

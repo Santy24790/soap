@@ -9,6 +9,32 @@ class Producto
         $this->pdo = $pdo;
     }
 
+    public function buscarEnProductos($valor)
+    {
+        // Definir las columnas en las que quieres buscar
+        $columnas = ['nombre', 'descripcion', 'stock', 'precio',]; 
+
+        // Construir la consulta SQL
+        $sql = "SELECT * FROM productos WHERE ";
+        $condiciones = [];
+        $params = [];
+
+        // Generar las condiciones para cada columna
+        foreach ($columnas as $columna) {
+            $condiciones[] = "$columna LIKE :valor";
+        }
+
+        // Unir las condiciones con "OR" para buscar en todas las columnas
+        $sql .= implode(" OR ", $condiciones);
+
+        // Preparar y ejecutar la consulta
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':valor', "%$valor%", PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Obtener todos los productos
     public function getProductos()
     {

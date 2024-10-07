@@ -1,9 +1,11 @@
 <?php
 // services/UsuarioService.php
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
-require_once __DIR__ . '/../config/productos.php';
+require_once __DIR__ . '/../config/db.php'; // Usar un solo archivo de conexión
 require_once __DIR__ . '/../controllers/UsuarioController.php';
+require_once __DIR__ . '/../models/Categoria.php';
 require_once __DIR__ . '/../controllers/CategoriaController.php'; // Importar el controlador de categorías
+require_once __DIR__ . '/../controllers/ProductosController.php'; // Importar el controlador de productos
 
 // Configuración del servicio SOAP
 $namespace = "user";
@@ -101,7 +103,54 @@ $server->register(
     'encoded',
     'Eliminar un usuario'
 );
+$server->register(
+    'FiltrarProductos',
+    array('filtros' => 'tns:Array'), // Parámetro de entrada
+    array('return' => 'xsd:string'), // Tipo de retorno
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Filtrar productos por nombre, stock, categoría, etc.'
+);
+$server->wsdl->addComplexType(
+    'FiltroProducto',
+    'complexType',
+    'struct',
+    'all',
+    '',
+    array(
+        'nombre' => array('name' => 'nombre', 'type' => 'xsd:string'),
+        'stock' => array('name' => 'stock', 'type' => 'xsd:int'),
+        'categoria' => array('name' => 'categoria', 'type' => 'xsd:int')
+    )
+);
 
+// Registrar método SOAP para filtrar productos
+$server->register(
+    'BuscarEnProductos',
+    array('valor' => 'xsd:string'), // Parámetro de entrada
+    array('return' => 'xsd:string'), // Tipo de retorno
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar en productos por un valor en cualquier campo'
+);
+
+// Función que llama al controlador para buscar en productos
+function BuscarEnProductos($valor)
+{
+    $pdo = getConnection('productos_bd'); // Conectar a la base de datos de productos
+    $controller = new ProductoController($pdo); // Instanciar el controlador
+
+    // Capturar la salida del controlador en formato XML
+    ob_start();
+    $controller->buscarEnProductos($valor); // Pasar el valor de búsqueda al controlador
+    $xmlResponse = ob_get_clean();
+
+    return $xmlResponse; // Devolver la respuesta en XML
+}
 // Función que llama al controlador para buscar una categoría por nombre
 function BuscarCategoria($nombre)
 {
@@ -131,7 +180,7 @@ function VerUsuarios()
 // Función que llama al controlador para obtener el detalle de un usuario
 function VerUsuario($id)
 {
-    $pdo = getConnection();
+    $pdo = getConnection('gestion_usuarios');
     $controller = new UserController($pdo);
     return $controller->getUserDetail($id);
 }
@@ -139,7 +188,7 @@ function VerUsuario($id)
 // Función que llama al controlador para crear un usuario
 function CrearUsuario($data)
 {
-    $pdo = getConnection();
+    $pdo = getConnection('gestion_usuarios');
     $controller = new UserController($pdo);
     return $controller->createUser($data);
 }
@@ -147,7 +196,7 @@ function CrearUsuario($data)
 // Función que llama al controlador para actualizar un usuario
 function ActualizarUsuario($data, $id)
 {
-    $pdo = getConnection();
+    $pdo = getConnection('gestion_usuarios');
     $controller = new UserController($pdo);
     return $controller->updateUser($data, $id);
 }
@@ -155,13 +204,13 @@ function ActualizarUsuario($data, $id)
 // Función que llama al controlador para eliminar un usuario
 function EliminarUsuario($id)
 {
-    $pdo = getConnection();
+    $pdo = getConnection('gestion_usuarios');
     $controller = new UserController($pdo);
     return $controller->deleteUser($id);
 }
-
 
 // Procesar solicitud SOAP
 $POST_DATA = file_get_contents("php://input");
 $server->service($POST_DATA);
 exit();
+?>
