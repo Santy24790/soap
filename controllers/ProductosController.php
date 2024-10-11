@@ -11,6 +11,24 @@ class ProductoController
     {
         $this->productoModel = new Producto($pdo);
     }
+    public function calcularTotalConDescuentoPorNombre($nombre)
+    {
+        $resultado = $this->productoModel->calcularTotalConDescuentoPorNombre($nombre);
+
+        // Devolver los resultados en formato XML
+        $xml = new SimpleXMLElement('<producto/>');
+        
+        if (is_array($resultado)) {
+            $xml->addChild('precio_original', $resultado['precio_original']);
+            $xml->addChild('descuento', $resultado['descuento']);
+            $xml->addChild('precio_final', $resultado['precio_final']);
+        } else {
+            $xml->addChild('error', $resultado); // En caso de error (producto no encontrado)
+        }
+
+        header('Content-Type: text/xml');
+        echo $xml->asXML();
+    }
 
     public function buscarEnProductos($valor)
     {

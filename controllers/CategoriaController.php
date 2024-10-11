@@ -59,7 +59,22 @@ public function buscarCategoria($nombre)
             exit;
         }
     }
+    public function buscarEnCategorias($valor)
+    {
+        $categorias = $this->categoriaModel->buscarEnCategorias($valor);
 
+        // Devolver los resultados en formato XML
+        $xml = new SimpleXMLElement('<categorias/>');
+        foreach ($categorias as $categoria) {
+            $categoriaNode = $xml->addChild('categoria');
+            foreach ($categoria as $key => $value) {
+                $categoriaNode->addChild($key, htmlspecialchars($value));
+            }
+        }
+
+        header('Content-Type: text/xml');
+        echo $xml->asXML();
+    }
     // Obtener detalle de una categoría por ID
     public function getCategoriaDetail($id)
     {

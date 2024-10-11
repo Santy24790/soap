@@ -8,7 +8,49 @@ class Producto
     {
         $this->pdo = $pdo;
     }
+    public function obtenerDescuento($id_descuento)
+    {
+        $descuento = 0;
 
+        // Aplicar el descuento basado en el ID
+        if ($id_descuento == 1) {
+            $descuento = 0.50; // 50%
+        } elseif ($id_descuento == 2) {
+            $descuento = 0.20; // 20%
+        }
+
+        return $descuento;
+    }
+
+    // Función para calcular el total con el descuento aplicado, buscando por nombre del producto
+    public function calcularTotalConDescuentoPorNombre($nombre)
+    {
+        // Buscar el producto por nombre
+        $sql = "SELECT precio, iddescuento FROM productos WHERE nombre = :nombre";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->execute();
+        $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($producto) {
+            $precio = $producto['precio'];
+            $id_descuento = $producto['iddescuento'];
+
+            // Obtener el porcentaje de descuento
+            $descuento = $this->obtenerDescuento($id_descuento);
+
+            // Calcular el precio con el descuento
+            $precio_final = $precio - ($precio * $descuento);
+
+            return [
+                'precio_original' => $precio,
+                'descuento' => $descuento * 100 . '%',
+                'precio_final' => $precio_final
+            ];
+        } else {
+            return "Producto no encontrado";
+        }
+    }
     public function buscarEnProductos($valor)
     {
         // Definir las columnas en las que quieres buscar

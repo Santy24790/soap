@@ -138,6 +138,32 @@ $server->register(
     'Buscar en productos por un valor en cualquier campo'
 );
 
+
+// Función que llama al controlador para calcular el total con descuento
+$server->register(
+    'CalcularTotalConDescuentoPorNombre',
+    array('nombre' => 'xsd:string'), // Parámetro de entrada
+    array('return' => 'xsd:string'), // Tipo de retorno
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Calcular el total con descuento para un producto, buscando por nombre'
+);
+
+// Función que llama al controlador para calcular el total con descuento por nombre
+function CalcularTotalConDescuentoPorNombre($nombre)
+{
+    $pdo = getConnection('productos_bd'); // Conectar a la base de datos de productos
+    $controller = new ProductoController($pdo); // Instanciar el controlador
+
+    // Capturar la salida del controlador en formato XML
+    ob_start();
+    $controller->calcularTotalConDescuentoPorNombre($nombre); // Pasar el nombre del producto
+    $xmlResponse = ob_get_clean();
+
+    return $xmlResponse; // Devolver la respuesta en XML
+}
 // Función que llama al controlador para buscar en productos
 function BuscarEnProductos($valor)
 {
