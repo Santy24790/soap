@@ -10,6 +10,7 @@ class UserController
     {
         $this->userModel = new User($pdo);
     }
+    
 
     public function getAllUsers()
     {

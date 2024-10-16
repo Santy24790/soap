@@ -34,7 +34,7 @@ class ProductoController
     {
         $productos = $this->productoModel->buscarEnProductos($valor);
 
-        // Devolver los resultados en formato XML
+        // Crear la respuesta en XML
         $xml = new SimpleXMLElement('<productos/>');
         foreach ($productos as $producto) {
             $productoNode = $xml->addChild('producto');

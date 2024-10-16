@@ -25,6 +25,8 @@ class UsuarioCategoriaController
         return $this->userModel->getUserById($id);
     }
 
+   
+       
     // Método para buscar categorías por nombre
     public function buscarCategoria($nombre)
     {

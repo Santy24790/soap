@@ -6,6 +6,7 @@ require_once __DIR__ . '/../controllers/UsuarioController.php';
 require_once __DIR__ . '/../models/Categoria.php';
 require_once __DIR__ . '/../controllers/CategoriaController.php'; // Importar el controlador de categorías
 require_once __DIR__ . '/../controllers/ProductosController.php'; // Importar el controlador de productos
+require_once __DIR__ . '/../models/Producto.php'; 
 
 // Configuración del servicio SOAP
 $namespace = "user";
@@ -105,13 +106,13 @@ $server->register(
 );
 $server->register(
     'FiltrarProductos',
-    array('filtros' => 'tns:Array'), // Parámetro de entrada
-    array('return' => 'xsd:string'), // Tipo de retorno
+    array('valor' => 'xsd:string'), // Parámetro de entrada (variable de búsqueda)
+    array('return' => 'xsd:string'), // Tipo de retorno (respuesta en XML)
     $namespace,
     false,
     'rpc',
     'encoded',
-    'Filtrar productos por nombre, stock, categoría, etc.'
+    'Buscar productos en todas las columnas basado en un valor'
 );
 $server->wsdl->addComplexType(
     'FiltroProducto',
@@ -151,6 +152,19 @@ $server->register(
     'Calcular el total con descuento para un producto, buscando por nombre'
 );
 
+function FiltrarProductos($valor)
+{
+    $pdo = getConnection('productos_bd'); // Conectar a la base de datos de productos
+    $controller = new ProductoController($pdo); // Instanciar el controlador
+
+    // Capturar la salida del controlador en formato XML
+    ob_start();
+    $controller->buscarEnProductos($valor); // Pasar la variable de búsqueda
+    $xmlResponse = ob_get_clean();
+
+    return $xmlResponse; // Devolver la respuesta en XML
+}
+
 // Función que llama al controlador para calcular el total con descuento por nombre
 function CalcularTotalConDescuentoPorNombre($nombre)
 {
@@ -164,6 +178,7 @@ function CalcularTotalConDescuentoPorNombre($nombre)
 
     return $xmlResponse; // Devolver la respuesta en XML
 }
+
 // Función que llama al controlador para buscar en productos
 function BuscarEnProductos($valor)
 {
