@@ -3,6 +3,8 @@
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
 require_once __DIR__ . '/../config/productos.php';  // Configuración de la conexión a la base de datos
 require_once __DIR__ . '/../controllers/EstadoController.php';  // Controlador de Estado
+require_once __DIR__ . '/../models/estado.php';  // Modelo de datos de estado
+require_once __DIR__ . '/../controllers/EstadoController.php'; 
 
 // Configuración del servicio SOAP
 $namespace = "Estados";

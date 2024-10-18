@@ -51,24 +51,7 @@ class Producto
             return "Producto no encontrado";
         }
     }
-    public function buscarEnProductos($valor)
-    {
-        $sql = "SELECT * FROM productos WHERE nombre LIKE :valor 
-                OR descripcion LIKE :valor 
-                OR stock LIKE :valor 
-                OR idcategoria LIKE :valor 
-                OR idproveedor LIKE :valor 
-                OR idestado LIKE :valor 
-                OR iddescuento LIKE :valor 
-                OR precio LIKE :valor";
-
-        $stmt = $this->pdo->prepare($sql);
-        $valor = "%" . $valor . "%";
-        $stmt->bindParam(':valor', $valor);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    
     // Obtener todos los productos
     public function getProductos()
     {
