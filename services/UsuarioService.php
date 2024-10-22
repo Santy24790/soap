@@ -7,7 +7,8 @@ require_once __DIR__ . '/../models/Categoria.php';
 require_once __DIR__ . '/../controllers/CategoriaController.php'; // Importar el controlador de categorías
 require_once __DIR__ . '/../controllers/ProductosController.php'; // Importar el controlador de productos
 require_once __DIR__ . '/../models/Producto.php'; 
-
+require_once __DIR__ . '/SoapService.php';
+use Services\SoapService;
 // Configuración del servicio SOAP
 $namespace = "user";
 $server = new soap_server();
@@ -104,28 +105,6 @@ $server->register(
     'encoded',
     'Eliminar un usuario'
 );
-$server->register(
-    'FiltrarProductos',
-    array('valor' => 'xsd:string'), // Parámetro de entrada (variable de búsqueda)
-    array('return' => 'xsd:string'), // Tipo de retorno (respuesta en XML)
-    $namespace,
-    false,
-    'rpc',
-    'encoded',
-    'Buscar productos en todas las columnas basado en un valor'
-);
-$server->wsdl->addComplexType(
-    'FiltroProducto',
-    'complexType',
-    'struct',
-    'all',
-    '',
-    array(
-        'nombre' => array('name' => 'nombre', 'type' => 'xsd:string'),
-        'stock' => array('name' => 'stock', 'type' => 'xsd:int'),
-        'categoria' => array('name' => 'categoria', 'type' => 'xsd:int')
-    )
-);
 
 // Registrar método SOAP para filtrar productos
 $server->register(
@@ -152,19 +131,45 @@ $server->register(
     'Calcular el total con descuento para un producto, buscando por nombre'
 );
 
-function FiltrarProductos($valor)
+
+// Registrar métodos relacionados con usuarios
+$server->register('VerUsuarios', array(), array('return' => 'xsd:Array'), $namespace, false, 'rpc', 'encoded', 'Ver todos los usuarios');
+$server->register('CrearUsuario', array('data' => 'tns:Usuario'), array('return' => 'xsd:string'), $namespace, false, 'rpc', 'encoded', 'Crear un usuario');
+
+// Registrar método para que los usuarios accedan a productos
+$server->register(
+    'FiltrarProductosDesdeUsuario',
+    array('valor' => 'xsd:string'),
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Permitir a los usuarios filtrar productos a través del servicio de productos'
+);
+
+// Función que llama al servicio de productos para filtrar productos
+function FiltrarProductosDesdeUsuario($valor)
 {
-    $pdo = getConnection('productos_bd'); // Conectar a la base de datos de productos
-    $controller = new ProductoController($pdo); // Instanciar el controlador
+    // URL del servicio de productos
+    $location = "http://localhost/soap1/services/ProductoService.php";
+    $action = "http://localhost/soap1/services/ProductoService.php#FiltrarProductos";
 
-    // Capturar la salida del controlador en formato XML
-    ob_start();
-    $controller->buscarEnProductos($valor); // Pasar la variable de búsqueda
-    $xmlResponse = ob_get_clean();
+    // Formar la solicitud SOAP con comillas dobles para las etiquetas XML
+    $request = "
+    <soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">
+        <soapenv:Body>
+            <FiltrarProductos>
+                <valor>$valor</valor>
+            </FiltrarProductos>
+        </soapenv:Body>
+    </soapenv:Envelope>";
 
-    return $xmlResponse; // Devolver la respuesta en XML
+    // Usar cURL para consumir el servicio SOAP de productos
+    $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
+
+    return $response;
 }
-
 // Función que llama al controlador para calcular el total con descuento por nombre
 function CalcularTotalConDescuentoPorNombre($nombre)
 {
@@ -187,7 +192,7 @@ function BuscarEnProductos($valor)
 
     // Capturar la salida del controlador en formato XML
     ob_start();
-    $controller->buscarEnProductos($valor); // Pasar el valor de búsqueda al controlador
+    $controller->BuscarEnProductos($valor); // Pasar el valor de búsqueda al controlador
     $xmlResponse = ob_get_clean();
 
     return $xmlResponse; // Devolver la respuesta en XML
@@ -254,4 +259,4 @@ function EliminarUsuario($id)
 $POST_DATA = file_get_contents("php://input");
 $server->service($POST_DATA);
 exit();
-?>
+

@@ -136,10 +136,86 @@ function EliminarProducto($id) {
     return $controller->deleteProducto($id);
 }
 
+
+// Registrar método SOAP para calcular el total con descuento
+$server->register(
+    'CalcularTotalConDescuentoPorNombre',
+    array('nombre' => 'xsd:string'), // Parámetro de entrada (nombre del producto)
+    array('return' => 'xsd:string'), // Tipo de retorno (respuesta con el total con descuento)
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Calcular el total con descuento de un producto'
+);
+
+// Registrar método SOAP para buscar en productos por valor
+$server->register(
+    'BuscarEnProductos',
+    array('valor' => 'xsd:string'), // Parámetro de entrada
+    array('return' => 'xsd:string'), // Tipo de retorno
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar en productos basado en cualquier campo'
+);
+
+$server->register(
+    'FiltrarProductos',
+    array('valor' => 'xsd:string'),
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar productos por valor en cualquier campo'
+);
+
+// Implementación de la función en ProductoService
+
+// Función que filtra productos basado en un valor
+function FiltrarProductos($valor) {
+    $pdo = getConnection('productos_bd');
+    $controller = new ProductoController($pdo);
+    
+    ob_start();
+    try {
+        $controller->buscarEnProductos($valor);
+        $xmlResponse = ob_get_clean();
+    } catch (Exception $e) {
+        // Si ocurre un error, devolver un XML con el error
+        $xmlResponse = "<error><message>" . $e->getMessage() . "</message></error>";
+    }
+
+    // Asegúrate de que se devuelva un XML válido
+    return $xmlResponse;
+}
+
+// Función que calcula el total con descuento por nombre
+function CalcularTotalConDescuentoPorNombre($nombre) {
+    $pdo = getConnection('productos_bd');
+    $controller = new ProductoController($pdo);
+    
+    ob_start();
+    $controller->calcularTotalConDescuentoPorNombre($nombre);
+    return ob_get_clean();
+}
+
+// Función para buscar en productos por valor
+function BuscarEnProductos($valor) {
+    $pdo = getConnection('productos_bd');
+    $controller = new ProductoController($pdo);
+    
+    ob_start();
+    $controller->buscarEnProductos($valor);
+    return ob_get_clean();
+}
+
 //-----------------------
 
 // Procesar solicitud SOAP
 $POST_DATA = file_get_contents("php://input");
 $server->service($POST_DATA);
 exit();
-?>
+
