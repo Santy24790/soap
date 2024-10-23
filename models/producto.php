@@ -147,6 +147,14 @@ class Producto
         $stmt->bindParam(':id', $id);
         return $stmt->execute(); // Devuelve true si la eliminación fue exitosa, false en caso contrario
     }
+    public function obtenerProductos($valor)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM productos WHERE nombre LIKE :valor");
+        $stmt->execute(['valor' => "%$valor%"]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); // Devuelve todos los productos como un array asociativo
+    }
+
 
     // Nueva función: Buscar productos en cualquier campo
     public function buscarEnProductos($valor)
@@ -158,6 +166,13 @@ class Producto
         $stmt->bindParam(':valor', $valor);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $xml = new SimpleXMLElement('<productos/>');
+    foreach ($resultados as $producto) {
+        $productoNode = $xml->addChild('producto');
+        foreach ($producto as $key => $value) {
+            $productoNode->addChild($key, htmlspecialchars($value));
+        }
+    }
     }
 }
 ?>

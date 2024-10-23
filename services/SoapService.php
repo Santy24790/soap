@@ -1,9 +1,9 @@
 <?php
+
 namespace Services;
 
 class SoapService {
     public static function consumirServicioSoap($location, $action, $request) {
-        // Definir los encabezados para la solicitud SOAP
         $headers = [
             'Method: POST',
             'Connection: Keep-Alive',
@@ -23,8 +23,8 @@ class SoapService {
         // Ejecutar la solicitud y obtener la respuesta
         $response = curl_exec($ch);
         
-        // Verificar si hubo un error en cURL
-        if ($response === false) {
+        // Verificar si hubo un error con cURL
+        if (curl_errno($ch)) {
             $error_message = curl_error($ch);
             curl_close($ch);
             return "Error en la solicitud SOAP: " . $error_message;
@@ -35,22 +35,28 @@ class SoapService {
         curl_close($ch);
 
         // Si la respuesta HTTP no es 200, devolver un mensaje de error
-        if ($http_code !== 200) {
+        if ($http_code != 200) {
             return "Error en la respuesta HTTP. Código: " . $http_code;
         }
 
-        // Retornar la respuesta en formato XML (legible)
-        return self::formatXmlResponse($response);
+        // Intentar formatear la respuesta en XML
+        try {
+            return self::formatXmlResponse($response);
+        } catch (\Exception $e) {
+            return "Error al procesar la respuesta SOAP: " . $e->getMessage();
+        }
     }
 
-    // Función para formatear la respuesta XML para que sea legible
+    // Función para formatear la respuesta XML
     private static function formatXmlResponse($response) {
-        // Manejar la excepción si la respuesta no es un XML válido
         try {
             $xml = new \SimpleXMLElement($response);
             return $xml->asXML(); // Devolver el XML bien formateado
         } catch (\Exception $e) {
-            return "Error al procesar la respuesta XML: " . $e->getMessage();
+            throw new \Exception("Respuesta XML no válida: " . $response);
         }
     }
 }
+
+
+?>

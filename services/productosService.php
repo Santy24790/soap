@@ -207,13 +207,30 @@ function BuscarEnProductos($valor) {
     $pdo = getConnection('productos_bd');
     $controller = new ProductoController($pdo);
     
-    ob_start();
-    $controller->buscarEnProductos($valor);
-    return ob_get_clean();
+    try {
+        $controller->buscarEnProductos($valor); // La función del controlador imprime XML
+    } catch (Exception $e) {
+        $xmlResponse = "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
+    }
+
+    return $xmlResponse;
 }
-
-//-----------------------
-
+function FiltrarProductosDesdeUsuario($valor) {
+    // Obtener la conexión a la base de datos
+    $pdo = getConnection('productos_bd'); // Asegúrate de que esta función devuelva la conexión correctamente
+    $controller = new ProductoController($pdo);
+    
+    // Iniciar la captura de la salida
+    ob_start();
+    try {
+        // Llamar al método del controlador para buscar productos
+        $controller->buscarEnProductos($valor);
+        $xmlResponse = ob_get_clean(); // Obtener el XML generado
+    } catch (Exception $e) {
+        // Si ocurre un error, devolver un XML con el error
+        $xmlResponse = "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
+    }
+}
 // Procesar solicitud SOAP
 $POST_DATA = file_get_contents("php://input");
 $server->service($POST_DATA);

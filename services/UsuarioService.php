@@ -110,7 +110,7 @@ $server->register(
 $server->register(
     'BuscarEnProductos',
     array('valor' => 'xsd:string'), // Parámetro de entrada
-    array('return' => 'xsd:string'), // Tipo de retorno
+    array('return' => 'xsd:array'), // Tipo de retorno
     $namespace,
     false,
     'rpc',
@@ -140,7 +140,7 @@ $server->register('CrearUsuario', array('data' => 'tns:Usuario'), array('return'
 $server->register(
     'FiltrarProductosDesdeUsuario',
     array('valor' => 'xsd:string'),
-    array('return' => 'xsd:string'),
+    array('return' => 'xsd:array'),
     $namespace,
     false,
     'rpc',
@@ -151,24 +151,27 @@ $server->register(
 // Función que llama al servicio de productos para filtrar productos
 function FiltrarProductosDesdeUsuario($valor)
 {
-    // URL del servicio de productos
-    $location = "http://localhost/soap1/services/ProductoService.php";
-    $action = "http://localhost/soap1/services/ProductoService.php#FiltrarProductos";
-
-    // Formar la solicitud SOAP con comillas dobles para las etiquetas XML
+   // URL del servicio de productos
+    // Asegúrate de que la ruta y el archivo son correctos
+    $location = "http://localhost/soap1/services/ProductosService.php";
+    $action = "http://localhost/soap1/services/ProductosService.php#FiltrarProductos";
+ 
+    // Formar la solicitud SOAP
     $request = "
-    <soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">
+    <soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
         <soapenv:Body>
             <FiltrarProductos>
-                <valor>$valor</valor>
+                <valor>{$valor}</valor>
             </FiltrarProductos>
         </soapenv:Body>
     </soapenv:Envelope>";
+ 
+    // Consumir el servicio SOAP de productos
+   $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
 
-    // Usar cURL para consumir el servicio SOAP de productos
-    $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
+// Devuelve la respuesta sin modificar
+return $response;
 
-    return $response;
 }
 // Función que llama al controlador para calcular el total con descuento por nombre
 function CalcularTotalConDescuentoPorNombre($nombre)
