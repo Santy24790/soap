@@ -37,28 +37,28 @@ $server->wsdl->schemaTargetNamespace = $namespace;
     }
 
 // Registrar método SOAP para ver todos los productos
-$server->register(
-    'VerProductos',
-    array(),
-    array('return' => 'xsd:Array'),
-    $namespace,
-    false,
-    'rpc',
-    'encoded',
-    'Ver todos los productos'
-);
+// $server->register(
+//     'VerProductos',
+//     array(),
+//     array('return' => 'xsd:Array'),
+//     $namespace,
+//     false,
+//     'rpc',
+//     'encoded',
+//     'Ver todos los productos'
+// );
 
 // Registrar método SOAP para ver detalle de un producto
-$server->register(
-    "VerProducto",
-    array('id' => 'xsd:int'),    // Parámetro de entrada
-    array('return' => 'xsd:string'),  // Tipo de retorno
-    'urn:productos',            // Namespace
-    'urn:productos#VerProducto', // Acción SOAP
-    'rpc',                      // Estilo
-    'encoded',                  // Uso
-    'Obtiene los detalles de un producto por su ID' // Descripción
-);
+// $server->register(
+//     "VerProducto",
+//     array('id' => 'xsd:int'),    // Parámetro de entrada
+//     array('return' => 'xsd:string'),  // Tipo de retorno
+//     'urn:productos',            // Namespace
+//     'urn:productos#VerProducto', // Acción SOAP
+//     'rpc',                      // Estilo
+//     'encoded',                  // Uso
+//     'Obtiene los detalles de un producto por su ID' // Descripción
+// );
 
 
 // Registrar método SOAP para crear un producto
@@ -164,7 +164,7 @@ $server->register(
 $server->register(
     'FiltrarProductos',
     array('valor' => 'xsd:string'),
-    array('return' => 'xsd:string'),
+    array('return' => 'xsd:array'),
     $namespace,
     false,
     'rpc',

@@ -27,7 +27,7 @@ class SoapService {
         if (curl_errno($ch)) {
             $error_message = curl_error($ch);
             curl_close($ch);
-            return "Error en la solicitud SOAP: " . $error_message;
+            return self::generarRespuestaError("Error en la solicitud SOAP: " . $error_message);
         }
 
         // Obtener el código de respuesta HTTP
@@ -36,27 +36,19 @@ class SoapService {
 
         // Si la respuesta HTTP no es 200, devolver un mensaje de error
         if ($http_code != 200) {
-            return "Error en la respuesta HTTP. Código: " . $http_code;
+            return self::generarRespuestaError("Error en la respuesta HTTP. Código: " . $http_code);
         }
 
-        // Intentar formatear la respuesta en XML
-        try {
-            return self::formatXmlResponse($response);
-        } catch (\Exception $e) {
-            return "Error al procesar la respuesta SOAP: " . $e->getMessage();
-        }
+        // Devolver la respuesta SOAP tal cual, sin formatear
+        return $response;
     }
 
-    // Función para formatear la respuesta XML
-    private static function formatXmlResponse($response) {
-        try {
-            $xml = new \SimpleXMLElement($response);
-            return $xml->asXML(); // Devolver el XML bien formateado
-        } catch (\Exception $e) {
-            throw new \Exception("Respuesta XML no válida: " . $response);
-        }
+    // Función para generar una respuesta de error en formato XML
+    private static function generarRespuestaError($mensaje) {
+        $xmlError = new \SimpleXMLElement('<error/>');
+        $xmlError->addChild('mensaje', htmlspecialchars($mensaje));
+        return $xmlError->asXML();
     }
 }
-
 
 ?>

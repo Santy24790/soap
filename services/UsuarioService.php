@@ -151,11 +151,13 @@ $server->register(
 // Función que llama al servicio de productos para filtrar productos
 function FiltrarProductosDesdeUsuario($valor)
 {
-   // URL del servicio de productos
-    // Asegúrate de que la ruta y el archivo son correctos
+    // URL del servicio de productos
     $location = "http://localhost/soap1/services/ProductosService.php";
     $action = "http://localhost/soap1/services/ProductosService.php#FiltrarProductos";
- 
+
+    // Sanitiza la entrada del usuario
+    $valor = htmlspecialchars($valor);
+
     // Formar la solicitud SOAP
     $request = "
     <soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
@@ -165,13 +167,22 @@ function FiltrarProductosDesdeUsuario($valor)
             </FiltrarProductos>
         </soapenv:Body>
     </soapenv:Envelope>";
- 
-    // Consumir el servicio SOAP de productos
-   $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
 
-// Devuelve la respuesta sin modificar
-return $response;
+    try {
+        // Consumir el servicio SOAP de productos
+        $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
 
+        // Verifica que la respuesta sea válida
+        if (!$response) {
+            throw new Exception("No se recibió respuesta del servicio.");
+        }
+
+        // Devuelve la respuesta tal como la recibió
+        return $response;
+    } catch (Exception $e) {
+        // Manejo de errores: puedes registrar el error o devolver un mensaje específico
+        return "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
+    }
 }
 // Función que llama al controlador para calcular el total con descuento por nombre
 function CalcularTotalConDescuentoPorNombre($nombre)

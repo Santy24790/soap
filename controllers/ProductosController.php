@@ -1,6 +1,6 @@
 <?php
 // controllers/ProductoController.php
-require_once __DIR__ . '/../models/producto.php';
+require_once __DIR__ . '/../models/Producto.php';
 
 class ProductoController
 {
@@ -19,9 +19,9 @@ class ProductoController
         $xml = new SimpleXMLElement('<producto/>');
         
         if (is_array($resultado)) {
-            $xml->addChild('precio_original', $resultado['precio_original']);
-            $xml->addChild('descuento', $resultado['descuento']);
-            $xml->addChild('precio_final', $resultado['precio_final']);
+            $xml->addChild('precio_original', htmlspecialchars($resultado['precio_original']));
+            $xml->addChild('descuento', htmlspecialchars($resultado['descuento']));
+            $xml->addChild('precio_final', htmlspecialchars($resultado['precio_final']));
         } else {
             $xml->addChild('error', htmlspecialchars($resultado)); // Escapar en caso de error (producto no encontrado)
         }
@@ -30,36 +30,38 @@ class ProductoController
         echo $xml->asXML();
     }
 
-    public function obtenerProductos($valor) {
+    public function obtenerProductos($valor)
+    {
         // Llamar al método del modelo para obtener productos
-        $productos = $this->productoModel->obtenerProductos($valor); // Asegúrate de que este método exista en tu modelo
+        $productos = $this->productoModel->obtenerProductos($valor); 
         
         return $productos; // Retorna el array de productos
     }
 
     public function buscarEnProductos($valor)
-    {
-        $productos = $this->obtenerProductos($valor); // Llama al método obtenerProductos
+{
+    // Obtener productos desde el modelo
+    $productos = $this->obtenerProductos($valor);
 
-        // Generar XML
-        $xml = new \SimpleXMLElement('<productos/>');
+    // Generar XML
+    $xml = new SimpleXMLElement('<productos/>');
 
-        foreach ($productos as $producto) {
-            $productoXml = $xml->addChild('producto');
-            $productoXml->addChild('idproductos', $producto['idproductos']);
-            $productoXml->addChild('nombre', htmlspecialchars($producto['nombre']));
-            $productoXml->addChild('descripcion', htmlspecialchars($producto['descripcion']));
-            $productoXml->addChild('stock', $producto['stock']);
-            $productoXml->addChild('idcategoria', $producto['idcategoria']);
-            $productoXml->addChild('idproveedor', $producto['idproveedor']);
-            $productoXml->addChild('idestado', $producto['idestado']);
-            $productoXml->addChild('iddescuento', $producto['iddescuento']);
-            $productoXml->addChild('precio', $producto['precio']);
-            }
-
-        header('Content-Type: text/xml');
-        echo $xml->asXML();
+    foreach ($productos as $producto) {
+        $productoXml = $xml->addChild('producto');
+        $productoXml->addChild('idproductos', htmlspecialchars($producto['idproductos']));
+        $productoXml->addChild('nombre', htmlspecialchars($producto['nombre']));
+        $productoXml->addChild('descripcion', htmlspecialchars($producto['descripcion']));
+        $productoXml->addChild('stock', htmlspecialchars($producto['stock']));
+        $productoXml->addChild('idcategoria', htmlspecialchars($producto['idcategoria']));
+        $productoXml->addChild('idproveedor', htmlspecialchars($producto['idproveedor']));
+        $productoXml->addChild('idestado', htmlspecialchars($producto['idestado']));
+        $productoXml->addChild('iddescuento', htmlspecialchars($producto['iddescuento']));
+        $productoXml->addChild('precio', htmlspecialchars($producto['precio']));
     }
+
+    // Retornar el XML como string
+    echo $xml->asXML(); 
+}
 
     public function getAllProductos()
     {
@@ -75,7 +77,6 @@ class ProductoController
                 }
             }
 
-            // Asegúrate de que no haya enviado ningún contenido antes de este encabezado
             header('Content-Type: text/xml');
             echo $xml->asXML();
         } else {
