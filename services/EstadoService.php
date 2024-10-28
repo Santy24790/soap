@@ -3,12 +3,10 @@
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
 require_once __DIR__ . '/../config/productos.php';  // Configuración de la conexión a la base de datos
 require_once __DIR__ . '/../controllers/EstadoController.php';  // Controlador de Estado
-require_once __DIR__ . '/../models/estado.php';  // Modelo de datos de estado
-require_once __DIR__ . '/../controllers/EstadoController.php'; 
 
 // Configuración del servicio SOAP
 $namespace = "Estados";
-$server = new Soap_Server();
+$server = new nusoap_server();
 $server->configureWSDL('ServicioEstados', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
 
@@ -25,11 +23,11 @@ $server->wsdl->addComplexType(
     )
 );
 
-// Registrar método SOAP para ver todos los estados
+// Registrar métodos SOAP
 $server->register(
     'VerEstados',
-    array(),  // Sin parámetros de entrada
-    array('return' => 'xsd:Array'),  // Retorna un array de estados
+    array(),
+    array('return' => 'xsd:Array'),
     $namespace,
     false,
     'rpc',
@@ -37,11 +35,10 @@ $server->register(
     'Ver todos los estados'
 );
 
-// Registrar método SOAP para ver el detalle de un estado por ID
 $server->register(
     'VerEstado',
-    array('id' => 'xsd:int'),  // Parámetro de entrada
-    array('return' => 'tns:Estado'),  // Retorna un estado
+    array('id' => 'xsd:int'),
+    array('return' => 'tns:Estado'),
     $namespace,
     false,
     'rpc',
@@ -49,11 +46,10 @@ $server->register(
     'Ver detalles de un estado por su ID'
 );
 
-// Registrar método SOAP para crear un estado
 $server->register(
     'CrearEstado',
-    array('data' => 'tns:Estado'),  // Recibe un objeto de tipo Estado
-    array('return' => 'xsd:string'),  // Retorna un mensaje
+    array('data' => 'tns:Estado'),
+    array('return' => 'xsd:string'),
     $namespace,
     false,
     'rpc',
@@ -61,11 +57,10 @@ $server->register(
     'Crear un nuevo estado'
 );
 
-// Registrar método SOAP para actualizar un estado
 $server->register(
     'ActualizarEstado',
-    array('data' => 'tns:Estado', 'id' => 'xsd:int'),  // Recibe un objeto de tipo Estado y el ID del estado
-    array('return' => 'xsd:string'),  // Retorna un mensaje
+    array('data' => 'tns:Estado', 'id' => 'xsd:int'),
+    array('return' => 'xsd:string'),
     $namespace,
     false,
     'rpc',
@@ -73,11 +68,10 @@ $server->register(
     'Actualizar un estado existente'
 );
 
-// Registrar método SOAP para eliminar un estado
 $server->register(
     'EliminarEstado',
-    array('id' => 'xsd:int'),  // El parámetro de entrada es el ID del estado
-    array('return' => 'xsd:string'),  // Retorna un mensaje
+    array('id' => 'xsd:int'),
+    array('return' => 'xsd:string'),
     $namespace,
     false,
     'rpc',
@@ -85,35 +79,31 @@ $server->register(
     'Eliminar un estado por su ID'
 );
 
-// Función para ver todos los estados
+// Funciones SOAP
 function VerEstados() {
     $pdo = getConnection();
     $controller = new EstadoController($pdo);
-    return $controller->getEstados();
+    return $controller->VerEstados();
 }
 
-// Función para ver el detalle de un estado
 function VerEstado($id) {
     $pdo = getConnection();
     $controller = new EstadoController($pdo);
-    return $controller->getEstadoById($id);
+    return $controller->VerEstado($id);
 }
 
-// Función para crear un estado
 function CrearEstado($data) {
     $pdo = getConnection();
     $controller = new EstadoController($pdo);
     return $controller->createEstado($data);
 }
 
-// Función para actualizar un estado
 function ActualizarEstado($data, $id) {
     $pdo = getConnection();
     $controller = new EstadoController($pdo);
     return $controller->updateEstado($data, $id);
 }
 
-// Función para eliminar un estado
 function EliminarEstado($id) {
     $pdo = getConnection();
     $controller = new EstadoController($pdo);

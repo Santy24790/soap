@@ -12,94 +12,54 @@ class Estado
     // Obtener todos los estados
     public function getEstados()
     {
-        try {
-            // Realiza una consulta para obtener todos los estados
-            $stmt = $this->pdo->query("SELECT * FROM estado");
-            // Devuelve los resultados en forma de array asociativo
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            // En caso de error, devuelve un array con el mensaje de error
-            return array('error' => $e->getMessage());
-        }
+        $stmt = $this->pdo->query("SELECT * FROM estados");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Obtener estado por ID
     public function getEstadoById($id)
     {
-        try {
-            // Preparamos la consulta SQL con un placeholder para el ID
-            $sql = "SELECT * FROM estado WHERE idestado = :id";
-            $stmt = $this->pdo->prepare($sql);
-            // Ejecutamos la consulta con el valor del parámetro id
-            $stmt->execute(['id' => $id]);
-            // Retornamos el resultado como un array asociativo
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            return array('error' => $e->getMessage());
-        }
+        $stmt = $this->pdo->prepare("SELECT * FROM estados WHERE idestado = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    
-    // Crear un nuevo estado
+
+    // Crear nuevo estado
     public function create($data)
     {
-        try {
-            // Preparamos la consulta SQL de inserción
-            $stmt = $this->pdo->prepare("INSERT INTO estado (estado) VALUES (:estado)");
-
-            // Enlazamos los parámetros de la consulta con los datos recibidos
-            $stmt->bindParam(':estado', $data['estado']);
-
-            // Ejecutamos la consulta y verificamos si se guardó correctamente
-            if ($stmt->execute()) {
-                return "Estado guardado correctamente";
-            } else {
-                return "Error al guardar el estado: " . implode(", ", $stmt->errorInfo());
-            }
-        } catch (PDOException $e) {
-            return "Error: " . $e->getMessage();
+        $stmt = $this->pdo->prepare("INSERT INTO estados (estado) VALUES (:estado)");
+        $stmt->bindParam(':estado', $data['estado'], PDO::PARAM_STR);
+        if ($stmt->execute()) {
+            return "Estado creado exitosamente.";
+        } else {
+            return "Error al crear el estado.";
         }
     }
-    
-    // Actualizar un estado existente
+
+    // Actualizar estado existente
     public function update($data, $id)
     {
-        try {
-            // Preparamos la consulta SQL para actualizar el estado
-            $stmt = $this->pdo->prepare("UPDATE estado SET estado = :estado WHERE idestado = :id");
-
-            // Enlazamos los parámetros de la consulta con los datos recibidos
-            $stmt->bindParam(':estado', $data['estado']);
-            $stmt->bindParam(':id', $id); // Enlazamos el ID del estado a actualizar
-
-            // Ejecutamos la consulta y verificamos si se actualizó correctamente
-            if ($stmt->execute()) {
-                return "Estado actualizado correctamente";
-            } else {
-                return "Error al actualizar el estado: " . implode(", ", $stmt->errorInfo());
-            }
-        } catch (PDOException $e) {
-            return "Error: " . $e->getMessage();
+        $stmt = $this->pdo->prepare("UPDATE estados SET estado = :estado WHERE idestado = :id");
+        $stmt->bindParam(':estado', $data['estado'], PDO::PARAM_STR);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        if ($stmt->execute()) {
+            return "Estado actualizado exitosamente.";
+        } else {
+            return "Error al actualizar el estado.";
         }
     }
 
-    // Eliminar un estado por ID
+    // Eliminar estado
     public function delete($id)
     {
-        try {
-            // Preparamos la consulta SQL para eliminar el estado
-            $stmt = $this->pdo->prepare("DELETE FROM estado WHERE idestado = :id");
-
-            // Enlazamos el ID del estado a eliminar
-            $stmt->bindParam(':id', $id);
-
-            // Ejecutamos la consulta y verificamos si se eliminó correctamente
-            if ($stmt->execute()) {
-                return true;
-            } else {
-                return "Error al eliminar el estado: " . implode(", ", $stmt->errorInfo());
-            }
-        } catch (PDOException $e) {
-            return false;
+        $stmt = $this->pdo->prepare("DELETE FROM estados WHERE idestado = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        if ($stmt->execute()) {
+            return "Estado eliminado correctamente.";
+        } else {
+            return "Error al eliminar el estado.";
         }
     }
 }
+?>
