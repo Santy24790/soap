@@ -1,15 +1,14 @@
 <?php
 // services/UsuarioService.php
-require_once __DIR__  . '/../vendor/econea/nusoap/src/nusoap.php';
-require_once __DIR__  . '/../config/db.php'; // Usar un solo archivo de conexión
-require_once __DIR__  . '/../controllers/UsuarioController.php';
-require_once __DIR__  . '/../models/Categoria.php';
-require_once __DIR__  . '/../controllers/CategoriaController.php'; // Importar el controlador de categorías
-require_once __DIR__  . '/../controllers/ProductosController.php'; // Importar el controlador de productos
-require_once __DIR__  . '/../models/Producto.php'; 
-require_once __DIR__  . '/SoapService.php';
+require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
+require_once __DIR__ . '/../config/db.php'; // Usar un solo archivo de conexión
+require_once __DIR__ . '/../controllers/UsuarioController.php';
+require_once __DIR__ . '/../models/Categoria.php';
+require_once __DIR__ . '/../controllers/CategoriaController.php'; // Importar el controlador de categorías
+require_once __DIR__ . '/../controllers/ProductosController.php'; // Importar el controlador de productos
+require_once __DIR__ . '/../models/Producto.php'; 
+require_once __DIR__ . '/SoapService.php';
 use Services\SoapService;
-
 // Configuración del servicio SOAP
 $namespace = "user";
 $server = new soap_server();
@@ -119,6 +118,7 @@ $server->register(
     'Buscar en productos por un valor en cualquier campo'
 );
 
+
 // Función que llama al controlador para calcular el total con descuento
 $server->register(
     'CalcularTotalConDescuentoPorNombre',
@@ -131,31 +131,6 @@ $server->register(
     'Calcular el total con descuento para un producto, buscando por nombre'
 );
 
-// Registrar método para calcular descuento desde usuario
-$server->register(
-    'CalcularDescuentoDesdeUsuario',
-    array('valor' => 'xsd:string'), // Parámetro de entrada
-    array('return' => 'xsd:string'), // Tipo de retorno
-    $namespace,
-    false,
-    'rpc',
-    'encoded',
-    'Calcular descuento para un producto desde el usuario'
-);
-
-// Función que llama al controlador para calcular el descuento
-function CalcularDescuentoDesdeUsuario($valor)
-{
-    $pdo = getConnection('productos_bd'); // Conectar a la base de datos de productos
-    $controller = new ProductoController($pdo); // Instanciar el controlador
-
-    // Capturar la salida del controlador en formato XML
-    ob_start();
-    $controller->calcularDescuento($valor); // Pasar el valor al controlador
-    $xmlResponse = ob_get_clean();
-
-    return $xmlResponse; // Devolver la respuesta en XML
-}
 
 // Registrar métodos relacionados con usuarios
 $server->register('VerUsuarios', array(), array('return' => 'xsd:Array'), $namespace, false, 'rpc', 'encoded', 'Ver todos los usuarios');
@@ -210,6 +185,90 @@ function FiltrarProductosDesdeUsuario($valor)
     }
 }
 
+// Registrar método SOAP para calcular el total con descuento desde usuario
+$server->register(
+    'CalcularTotalConDescuentoDesdeUsuario',
+    array('nombre' => 'xsd:string'),
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Calcular el total con descuento de un producto desde el servicio de usuario'
+);
+
+// Función que llama al servicio de productos para calcular el total con descuento
+function CalcularTotalConDescuentoDesdeUsuario($nombre)
+{
+    $location = "http://localhost/soap1/services/ProductoService.php";
+    $action = "http://localhost/soap1/services/ProductoService.php#CalcularTotalConDescuentoPorNombre";
+
+    $nombre = htmlspecialchars($nombre);
+
+    $request = "
+    <soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+        <soapenv:Body>
+            <CalcularTotalConDescuentoPorNombre>
+                <nombre>{$nombre}</nombre>
+            </CalcularTotalConDescuentoPorNombre>
+        </soapenv:Body>
+    </soapenv:Envelope>";
+
+    try {
+        $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
+
+        if (!$response) {
+            throw new Exception("No se recibió respuesta del servicio.");
+        }
+
+        return $response;
+    } catch (Exception $e) {
+        return "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
+    }
+}
+
+// Registrar método SOAP para buscar una categoría desde usuario
+$server->register(
+    'BuscarCategoriaDesdeUsuario',
+    array('nombre' => 'xsd:string'),
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar una categoría desde el servicio de usuario'
+);
+
+// Función que llama al servicio de categorías para buscar una categoría por nombre
+function BuscarCategoriaDesdeUsuario($nombre)
+{
+    $location = "http://localhost/soap1/services/CategoriaService.php";
+    $action = "http://localhost/soap1/services/CategoriaService.php#BuscarCategoria";
+
+    $nombre = htmlspecialchars($nombre);
+
+    $request = "
+    <soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+        <soapenv:Body>
+            <BuscarCategoria>
+                <nombre>{$nombre}</nombre>
+            </BuscarCategoria>
+        </soapenv:Body>
+    </soapenv:Envelope>";
+
+    try {
+        $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
+
+        if (!$response) {
+            throw new Exception("No se recibió respuesta del servicio.");
+        }
+
+        return $response;
+    } catch (Exception $e) {
+        return "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
+    }
+}
+
 // Función que llama al controlador para calcular el total con descuento por nombre
 function CalcularTotalConDescuentoPorNombre($nombre)
 {
@@ -237,25 +296,65 @@ function BuscarEnProductos($valor)
 
     return $xmlResponse; // Devolver la respuesta en XML
 }
-
 // Función que llama al controlador para buscar una categoría por nombre
 function BuscarCategoria($nombre)
 {
     $pdo = getConnection('productos_bd'); // Conectar a la base de datos de productos
-    $categoriaModel = new Categoria($pdo); // Pasar la conexión al modelo de categoría
-    $controller = new CategoriaController($categoriaModel); // Instanciar el controlador de categorías
+    $categoriaModel = new Categoria($pdo); // Pasar la conexión al modelo
+    $categorias = $categoriaModel->buscarPorNombre($nombre);
 
-    // Capturar la salida del controlador en formato XML
-    ob_start();
-    $controller->buscarPorNombre($nombre); // Pasar el nombre de la categoría
-    $xmlResponse = ob_get_clean();
-
-    return $xmlResponse; // Devolver la respuesta en XML
+    // Convertir los resultados a XML y devolverlos como respuesta SOAP
+    $xml = new SimpleXMLElement('<categorias/>');
+    foreach ($categorias as $categoria) {
+        $categoriaNode = $xml->addChild('categoria');
+        foreach ($categoria as $key => $value) {
+            $categoriaNode->addChild($key, htmlspecialchars($value));
+        }
+    }
+    return $xml->asXML();
 }
 
-// Proceso de ejecución
-if (!isset($HTTP_RAW_POST_DATA)) {
-    $HTTP_RAW_POST_DATA = file_get_contents('php://input');
+// Función que llama al controlador para obtener todos los usuarios
+function VerUsuarios()
+{
+    $pdo = getConnection('gestion_usuarios'); // Conectar a la base de datos de usuarios
+    $controller = new UserController($pdo);
+    return $controller->getAllUsers();
 }
-$server->service($HTTP_RAW_POST_DATA);
-?>
+
+// Función que llama al controlador para obtener el detalle de un usuario
+function VerUsuario($id)
+{
+    $pdo = getConnection('gestion_usuarios');
+    $controller = new UserController($pdo);
+    return $controller->getUserDetail($id);
+}
+
+// Función que llama al controlador para crear un usuario
+function CrearUsuario($data)
+{
+    $pdo = getConnection('gestion_usuarios');
+    $controller = new UserController($pdo);
+    return $controller->createUser($data);
+}
+
+// Función que llama al controlador para actualizar un usuario
+function ActualizarUsuario($data, $id)
+{
+    $pdo = getConnection('gestion_usuarios');
+    $controller = new UserController($pdo);
+    return $controller->updateUser($data, $id);
+}
+
+// Función que llama al controlador para eliminar un usuario
+function EliminarUsuario($id)
+{
+    $pdo = getConnection('gestion_usuarios');
+    $controller = new UserController($pdo);
+    return $controller->deleteUser($id);
+}
+
+// Procesar solicitud SOAP
+$POST_DATA = file_get_contents("php://input");
+$server->service($POST_DATA);
+exit();

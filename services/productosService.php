@@ -1,8 +1,8 @@
 <?php
 // services/ProductoService.php
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
-require_once __DIR__  . '/../config/productos.php';
-require_once __DIR__  . '/../controllers/ProductosController.php';
+require_once __DIR__ . '/../config/productos.php';
+require_once __DIR__ . '/../controllers/ProductosController.php';
 
 // Configuración del servicio SOAP
 $namespace = "Productos";
