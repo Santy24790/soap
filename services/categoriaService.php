@@ -56,6 +56,28 @@ function EliminarCategoria($id) {
     return $controller->deleteCategoria($id); // Asegúrate de que este método devuelva un mensaje
 }
 
+// Registrar el método para buscar una categoría
+$server->register(
+    'BuscarCategoria',
+    array('nombre' => 'xsd:string'),
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar una categoría por su nombre'
+);
+
+// Función en CategoriaService para buscar la categoría
+// function BuscarCategoria($nombre) {
+//     $categoria = obtenerCategoriaPorNombre($nombre); // Método de ejemplo que deberías tener
+//     if ($categoria) {
+//         return "<resultado><id>{$categoria['id']}</id><nombre>{$categoria['nombre']}</nombre></resultado>";
+//     } else {
+//         return "<error><message>Categoría no encontrada</message></error>";
+//     }
+// }
+
 // Registrar métodos SOAP para ver todas las categorías
 $server->register(
     'VerCategorias',

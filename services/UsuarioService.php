@@ -180,6 +180,91 @@ function FiltrarProductosDesdeUsuario($valor)
         return "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
     }
 }
+
+// Registrar método SOAP para calcular el total con descuento desde usuario
+$server->register(
+    'CalcularTotalConDescuentoDesdeUsuario',
+    array('nombre' => 'xsd:string'),
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Calcular el total con descuento de un producto desde el servicio de usuario'
+);
+
+// Función que llama al servicio de productos para calcular el total con descuento
+function CalcularTotalConDescuentoDesdeUsuario($nombre)
+{
+    $location = "http://localhost/soap1/services/ProductoService.php";
+    $action = "http://localhost/soap1/services/ProductoService.php#CalcularTotalConDescuentoPorNombre";
+
+    $nombre = htmlspecialchars($nombre);
+
+    $request = "
+    <soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+        <soapenv:Body>
+            <CalcularTotalConDescuentoPorNombre>
+                <nombre>{$nombre}</nombre>
+            </CalcularTotalConDescuentoPorNombre>
+        </soapenv:Body>
+    </soapenv:Envelope>";
+
+    try {
+        $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
+
+        if (!$response) {
+            throw new Exception("No se recibió respuesta del servicio.");
+        }
+
+        return $response;
+    } catch (Exception $e) {
+        return "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
+    }
+}
+
+// Registrar método SOAP para buscar una categoría desde usuario
+$server->register(
+    'BuscarCategoriaDesdeUsuario',
+    array('nombre' => 'xsd:string'),
+    array('return' => 'xsd:string'),
+    $namespace,
+    false,
+    'rpc',
+    'encoded',
+    'Buscar una categoría desde el servicio de usuario'
+);
+
+// Función que llama al servicio de categorías para buscar una categoría por nombre
+function BuscarCategoriaDesdeUsuario($nombre)
+{
+    $location = "http://localhost/soap1/services/CategoriaService.php";
+    $action = "http://localhost/soap1/services/CategoriaService.php#BuscarCategoria";
+
+    $nombre = htmlspecialchars($nombre);
+
+    $request = "
+    <soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+        <soapenv:Body>
+            <BuscarCategoria>
+                <nombre>{$nombre}</nombre>
+            </BuscarCategoria>
+        </soapenv:Body>
+    </soapenv:Envelope>";
+
+    try {
+        $response = \Services\SoapService::consumirServicioSoap($location, $action, $request);
+
+        if (!$response) {
+            throw new Exception("No se recibió respuesta del servicio.");
+        }
+
+        return $response;
+    } catch (Exception $e) {
+        return "<error><message>" . htmlspecialchars($e->getMessage()) . "</message></error>";
+    }
+}
+
 // Función que llama al controlador para calcular el total con descuento por nombre
 function CalcularTotalConDescuentoPorNombre($nombre)
 {
