@@ -3,10 +3,6 @@
 require_once __DIR__ . '/../vendor/econea/nusoap/src/nusoap.php';
 require_once __DIR__ . '/../config/db.php'; // Usar un solo archivo de conexión
 require_once __DIR__ . '/../controllers/UsuarioController.php';
-require_once __DIR__ . '/../models/Categoria.php';
-require_once __DIR__ . '/../controllers/CategoriaController.php'; // Importar el controlador de categorías
-require_once __DIR__ . '/../controllers/ProductosController.php'; // Importar el controlador de productos
-require_once __DIR__ . '/../models/Producto.php'; 
 require_once __DIR__ . '/SoapService.php';
 use Services\SoapService;
 // Configuración del servicio SOAP
